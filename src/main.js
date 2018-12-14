@@ -6,9 +6,13 @@ import store from './store'
 import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
+<<<<<<< HEAD
 Vue.use(BootstrapVue);
+=======
+>>>>>>> fix firebase error
 
 Vue.config.productionTip = false
+Vue.use(BootstrapVue);
 
 new Vue({
   router,

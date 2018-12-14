@@ -9,7 +9,9 @@ var config = {
   storageBucket: 'youngfox-blackjack.appspot.com',
   messagingSenderId: '82165920548'
 }
-const firebaseStart = firebase.initializeApp(config)
+// const firebaseStart = firebase.initializeApp(config)
+
+const firebaseStart = !firebase.apps.length ? firebase.initializeApp(config) : firebase.app();
 
 export default firebaseStart
 
