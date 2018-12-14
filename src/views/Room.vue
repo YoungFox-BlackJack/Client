@@ -10,14 +10,17 @@
                         tag="article"
                         style="max-width: 20rem; height:430px"
                         class="mb-2"
+                        border-variant="secondary"
                         bg-variant="light">
-                    <b-button v-if="!player1.ready" variant="primary" @click.prevent="changeStatus">Ready?</b-button>
-                    <b-button v-else variant="primary" @click.prevent="changeStatus">Ready!</b-button>
+                    <b-button v-if="!player1.ready && whichPlayer == 'player1'" variant="primary" @click.prevent="changeStatus">Ready?</b-button>
+                    <b-button v-else-if="!player1.ready && whichPlayer == 'player2'" disabled variant="primary" @click.prevent="changeStatus">Ready?</b-button>
+                    <b-button v-else-if="player1.ready && whichPlayer == 'player1'" variant="primary" @click.prevent="changeStatus">Ready!</b-button>
+                    <b-button v-else-if="player1.ready && whichPlayer == 'player2'" disabled variant="primary" @click.prevent="changeStatus">Ready!</b-button>
                 </b-card>
             </b-col>
 
             <b-col cols="4" v-if="allReady">
-                <b-button  variant="success">Let the Games Begin!</b-button>
+                <b-button  variant="success" @click="play">Let the Games Begin!</b-button>
             </b-col>
 
 
@@ -29,17 +32,35 @@
                         tag="article"
                         style="max-width: 20rem; height:430px"
                         class="mb-2"
+                        border-variant="secondary"
                         bg-variant="light">
                     <img v-if="!player2.ready==false && player2.name == ''" width="100px" src="https://thumbs.gfycat.com/WellinformedUnfoldedIndigowingedparrot-max-1mb.gif" alt="">
                     <h3 v-if="!player2.ready==false && player2.name == ''">Waiting . . . </h3>
-                    <b-button v-else-if="!player2.ready && player2.name != ''" variant="primary" @click.prevent="changeStatus2">Ready?</b-button>
-                    <b-button v-if="player2.ready == true" variant="primary" @click.prevent="changeStatus2">Ready!</b-button>
+                    <b-button v-else-if="!player2.ready && player2.name != '' && whichPlayer =='player2'" variant="primary" @click.prevent="changeStatus2">Ready?</b-button>
+                    <b-button v-else-if="!player2.ready && player2.name != '' && whichPlayer =='player1'" disabled variant="primary" @click.prevent="changeStatus2">Ready?</b-button>
+                    <b-button v-else-if="player2.ready == true && whichPlayer == 'player2'" variant="primary" @click.prevent="changeStatus2">Ready!</b-button>
+                    <b-button v-else-if="player2.ready == true && whichPlayer == 'player1'" disabled variant="primary" @click.prevent="changeStatus2">Ready!</b-button>
                 </b-card>
             </b-col>
         </b-row>
+        <audio id="marioReady" >
+            <source src="../assets/mario.wav" type="audio/mpeg">
+        </audio>
+
+        <audio id="luigiReady">
+            <source src="../assets/luigi.wav" type="audio/mpeg">
+        </audio>
+
+        <audio id="marioNoReady" >
+            <source src="../assets/mario_no.wav" type="audio/mpeg">
+        </audio>
+
+        <audio id="luigiNoReady">
+            <source src="../assets/luigi_no.wav" type="audio/mpeg">
+        </audio>
     </b-container>
 
-
+    
 
 </template>
 
@@ -49,6 +70,7 @@ import firebase from '../firebase/fire'
 export default {
     data() {
         return {
+            whichPlayer: "",
             roomId: "",
             player1: {},
             player2: {
@@ -59,26 +81,40 @@ export default {
         }
     },
     methods: {
+        play() {
+            firebase.database().ref(`rooms/${this.roomId}/playing`).set(true, snapshot => {
+            })
+        },
         changeStatus() {
             if(this.player1.ready) {
                 firebase.database().ref(`rooms/${this.roomId}/player1/ready`).set(false, snapshot => {
                 })
+                let notReady = document.getElementById("marioNoReady");
+                notReady.play();
             } else {
                 firebase.database().ref(`rooms/${this.roomId}/player1/ready`).set(true, snapshot => {
                 })
+                let ready = document.getElementById("marioReady");
+                ready.play();
             }
         },
         changeStatus2() {
             if(this.player2.ready) {
                 firebase.database().ref(`rooms/${this.roomId}/player2/ready`).set(false, snapshot => {
                 })
+                let notReady = document.getElementById("luigiNoReady");
+                notReady.play();
             } else {
                 firebase.database().ref(`rooms/${this.roomId}/player2/ready`).set(true, snapshot => {
                 })
+                let ready = document.getElementById("luigiReady");
+                ready.play();
             }
         }
     },
     mounted: function() {
+        let whichPlayer = localStorage.getItem('player')
+        this.whichPlayer = whichPlayer
         let self = this
         this.roomId = this.$route.params.roomId
         firebase.database().ref(`rooms/${this.$route.params.roomId}`).on('value', function(snapshot) {
@@ -95,13 +131,14 @@ export default {
             if(snapshot.val().player2.ready && snapshot.val().player1.ready) {
                 console.log('Theyre REady!!!!!!!')
                 self.allReady = true
-                //!!!!!!!!!!!!! just router push
             } else {
                 console.log('Theyre NOT REady')
                 self.allReady = false
             }
+            if(snapshot.val().playing == true) {
+                self.$router.push('/about') //change to playing route
+            }
         })
-
     }
 
 

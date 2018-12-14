@@ -27,15 +27,18 @@
                         img-alt="Image"
                         img-top
                         style="max-width: 200px;"
-                        class="mb-2">
+                        class="mb-2"
+                        border-variant="secondary">
                     <div>                 
-                        Room Master: {{ room.player1.name }}
+                        Creator: 
+                        <br>
+                        <b><i>{{ room.player1.name }}</i></b>
                     </div>
                     <div v-if="!room.player2 || !room.player2.name">
-                        # of players: 1
+                        Players: 1
                     </div>
                     <div v-else>
-                        # of players: 2
+                        Players: 2
                     </div>
                     <b-button v-if="!room.player2 || !room.player2.name" @click.prevent="joinRoom(room.roomId)" variant="primary">Join Room</b-button>
                     <b-button v-else variant="danger" disabled>Room Full</b-button>
@@ -45,7 +48,7 @@
     </div>
 
     <div v-else>
-        <img src="https://www.yebocasino.co.za/images/blackjackbanner.png" alt="">
+        <img class="frontPage" src="https://www.yebocasino.co.za/images/blackjackbanner.png" alt="">
         <br><br>
         <b-container class="bv-example-row">
             <b-row>
@@ -53,7 +56,7 @@
                 <b-col>
                     <form @submit.prevent="createName">
                         <div class="form-group">
-                            <label>Enter your Name:</label><br>
+                            <label style="font-size:26px;color:white; font-family: 'Charm', cursive; background-color:rgba(0,128,0,.5)">Enter your Name:</label><br>
                             <input type="text" class="form-control" v-model="playerInput" placeholder="Player Name">
                         </div>
                         <br>
@@ -99,16 +102,19 @@ export default {
             player2: {
               name: null,
               ready: false
-            }
+            },
+            playing: false
         })
         .then(snapshot => {
             this.addRoomName = ""
+            localStorage.setItem('player', 'player1')
             this.$router.push(`room/${snapshot.key}`)
         })
         
     },
     joinRoom(id) {
         firebase.database().ref(`rooms/${id}/player2/name`).set(this.playerName, snapshot => {
+            localStorage.setItem('player', 'player2')
             this.$router.push(`room/${id}`);
         })
     }
@@ -135,5 +141,57 @@ export default {
 </script>
 
 <style scoped>
+.frontPage {
+  -webkit-transition: all 3s ease-out;
+          transition: all 3s ease-out;
+  -webkit-animation: pulsate 8s ease-out infinite;
+          animation: pulsate 8s ease-out infinite;
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+  margin: 0;
+  font-family: Helvetica, Arial, Sand-serif;
+  font-weight: bold;
+  font-size: 6em;
+  color: white;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  text-transform: uppercase; }
+
+/*** Keyframes - used with the "animation" property in the h1 ***/
+@-webkit-keyframes pulsate {
+  0%, 20% {
+    -webkit-transform: translate(-50%, -50%) scale(1);
+            transform: translate(-50%, -50%) scale(1);
+    -webkit-filter: blur(5px);
+            filter: blur(5px); }
+  50%, 70% {
+    -webkit-transform: translate(-50%, -50%) scale(1.5);
+            transform: translate(-50%, -50%) scale(1.5);
+    -webkit-filter: none;
+            filter: none; }
+  100% {
+    -webkit-transform: translate(-50%, -50%) scale(1);
+            transform: translate(-50%, -50%) scale(1);
+    -webkit-filter: blur(5px);
+            filter: blur(5px); } }
+@keyframes pulsate {
+  0%, 20% {
+    -webkit-transform: translate(-50%, -50%) scale(1);
+            transform: translate(-50%, -50%) scale(1);
+    -webkit-filter: blur(5px);
+            filter: blur(5px); }
+  50%, 70% {
+    -webkit-transform: translate(-50%, -50%) scale(1.5);
+            transform: translate(-50%, -50%) scale(1.5);
+    -webkit-filter: none;
+            filter: none; }
+  100% {
+    -webkit-transform: translate(-50%, -50%) scale(1);
+            transform: translate(-50%, -50%) scale(1);
+    -webkit-filter: blur(5px);
+            filter: blur(5px); } }
 
 </style>
