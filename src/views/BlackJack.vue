@@ -13,43 +13,92 @@
 </template>
 <script>
 import firebase from "firebase"
+import axios from "axios"
 export default {
-  methods: {
-    startGame () {
-      
-    },
-    join () {
-      let index = 0
-      let playersRef = firebase.database().ref('players/')
-      playersRef.on('value', (snapshot) => {
-        for (var key in snapshot.val()) {
-          index++
-        }
-
-        if (!localStorage.getItem('token')) {
-          localStorage.setItem('token', `player${index + 1}`)
-          let turn = false
-
-          if (localStorage.getItem('token') === 'player1') {
-            turn = true
-          } 
-
-          firebase.database().ref('players/' + localStorage.getItem('token')).set({
-            turn: turn,
-            ready: false
-          }, (error) => {
-            if (error) {
-              this.message = 'Failed to join room, please try again'
-              this.alert = 'danger'
-              this.readyAlert = true
-            } else {
-              this.message = 'You successfully join the room'
-              this.alert =  'success'
-              this.readyAlert = true
-            }
-          })
-        }
+  mounted () {
+    let playerRef = firebase.database().ref('players/' + localStorage.getItem('token'))
+    playerRef.on('value', (snapshot) => {
+      if (snapshot.val().turn) {
+        this.isPlayerTurn = false
+      } else {
+        this.isPlayerTurn = true
+      }
     })
+
+    let cards = firebase.database().ref('players/' + localStorage.getItem('token') + '/cards')
+    cards.on('value', (snapshot) => {
+      this.ownCards = Object.values(snapshot.val())
+    })
+
+    let test = firebase.database().ref('players')
+    test.on('value', (snapshot, err) => {
+      this.gameEnd = 0
+        snapshot.forEach((childNode) => {
+          if(childNode.child('/done').val()) {
+            this.gameEnd ++
+          }
+        })
+    })
+
+    let opponent = firebase.database().ref('players')
+    opponent.on('value', (snapshot, err) => {
+      if (!err) {
+        snapshot.forEach((childNode) => {
+
+          if (childNode.key != localStorage.getItem('token')) {
+            this.opponentCards = []
+            childNode.child('/cards').forEach((superChild) => {
+                this.opponentCards.push('ga bole liat')
+            })
+          }
+        })
+      }
+    })
+  },
+  methods: {
+    pass () {
+      firebase.database().ref(`players/${localStorage.getItem('token')}`).update({
+        turn: false,
+        done: true
+        }, (error) => {
+          if (error) {
+            // this.message = 'Failed to ready check, please ready again'
+            // this.alert = 'danger'
+            // this.readyAlert = true
+          } else {
+             let players = firebase.database().ref('players')
+              players.on('value', (snapshot) => {
+                  snapshot.forEach((childNode) => {
+                    let playerDone = childNode.child('/done').val()
+                    if (childNode.key != localStorage.getItem('token') && !playerDone) {
+                      firebase.database().ref(`players/${childNode.key}`).update({
+                        turn: true
+                      }, (error) => {
+                          if (error) {
+
+                          } else {
+
+                          }
+                      })
+                    }
+                  })
+              })
+            }
+        })
+    },
+    draw () {
+      let card = null
+      axios({
+        method: "GET",
+        url: `https://deckofcardsapi.com/api/deck/new/draw/?count=1`
+        })
+        .then(cards => {
+          card = cards.data.cards[0]
+          firebase.database().ref(`/players/${localStorage.getItem('token')}/cards`).push(card)
+        })
+        .catch(err => {
+          console.log(err)
+      })
     }
   },
   data() {
@@ -61,7 +110,18 @@ export default {
       start: false,
       gameStart: false,
       totalReady: 0,
-      allReady: true
+      allReady: true,
+      isPlayerTurn: true,
+      ownCards: [],
+      opponentCards: [],
+      gameEnd: 0
+    }
+  },
+  watch: {
+    gameEnd (value) {
+      if (value === 2) {
+        this.$router.push('/result')
+      }
     }
   }
 }

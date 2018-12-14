@@ -56,7 +56,8 @@ export default {
 
           firebase.database().ref('players/' + localStorage.getItem('token')).set({
             turn: turn,
-            ready: false
+            ready: false,
+            done: false
           }, (error) => {
             if (error) {
               this.message = 'Failed to join room, please try again'
