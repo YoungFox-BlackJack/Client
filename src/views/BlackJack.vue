@@ -1,13 +1,13 @@
 <template>
   <div>
-    <b-button class="mr-3" :class="{disabled: isPlayerTurn}">Draw</b-button>
-    <b-button>Pass</b-button>
+    <b-button class="mr-3" :class="{disabled: isPlayerTurn}" @click="draw">Draw</b-button>
+    <b-button @click="pass">Pass</b-button>
    <b-alert dismissible :show="readyAlert" :variant="alert"  @dismissed="readyAlert=false">{{message}}</b-alert>
     <ul>
-      <li v-for="(card, index) in ownCards" :key="index">{{card}} </li>
+      <li v-for="(card, index) in ownCards" :key="index">{{card.value}} </li>
     </ul>
      <ul>
-      <li v-for="(card, index) in opponentCards" :key="index">Ga bole tau </li>
+      <li v-for="(card, index) in opponentCards" :key="index">{{card}}</li>
     </ul>
 </div>
 </template>

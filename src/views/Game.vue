@@ -84,7 +84,7 @@ export default {
        })
 
       if (count == 2) {
-        this.$router.push({path: '/game/play'})
+        this.$router.push({path: '/play'})
       } else {
         count = 0
       }
