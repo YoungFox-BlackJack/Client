@@ -84,7 +84,7 @@ export default {
   },
   methods: {
     clearGame () {
-       firebase.database().ref('players').remove()
+      firebase.database().ref('players').remove()
       localStorage.removeItem('token')
       this.$router.push('/game')
     }
