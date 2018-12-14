@@ -41,18 +41,21 @@ export default {
     join () {
       let index = 0
       let playersRef = firebase.database().ref('players/')
-      playersRef.on('value', (snapshot) => {
+      playersRef.once('value', (snapshot) => {
         for (var key in snapshot.val()) {
           index++
         }
 
+        let turn = false
+
         if (!localStorage.getItem('token')) {
           localStorage.setItem('token', `player${index + 1}`)
-          let turn = false
 
           if (localStorage.getItem('token') === 'player1') {
             turn = true
           } 
+
+          console.log('woi woi woi')
 
           firebase.database().ref('players/' + localStorage.getItem('token')).set({
             turn: turn,
@@ -70,7 +73,7 @@ export default {
             }
           })
         }
-    })
+      })
     }
   },
   mounted (){
