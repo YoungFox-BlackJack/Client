@@ -121,7 +121,7 @@ export default {
   mounted() {
     let playerRef = firebase
       .database()
-      .ref("players/" + localStorage.getItem("token"));
+      .ref("rooms/" + localStorage.getItem("room") + "/" + localStorage.getItem('token'));
     playerRef.on("value", snapshot => {
       if (snapshot.val().turn) {
         this.isPlayerTurn = false;
@@ -132,12 +132,13 @@ export default {
 
     let cards = firebase
       .database()
-      .ref("players/" + localStorage.getItem("token") + "/cards");
+      .ref("rooms/" + localStorage.getItem("room") + "/" + localStorage.getItem('token') + '/cards');
     cards.on("value", snapshot => {
+      this.ownCards = []
       this.ownCards = Object.values(snapshot.val());
     });
 
-    let test = firebase.database().ref("players");
+    let test = firebase.database().ref(localStorage.getItem("room") + "/" + localStorage.getItem('token'));
     test.on("value", (snapshot, err) => {
       this.gameEnd = 0;
       snapshot.forEach(childNode => {
@@ -147,25 +148,27 @@ export default {
       });
     });
 
-    let opponent = firebase.database().ref("players");
+    let opponent = firebase.database().ref(`rooms/${localStorage.getItem("room")}`);
     opponent.on("value", (snapshot, err) => {
       if (!err) {
-        snapshot.forEach(childNode => {
-          if (childNode.key != localStorage.getItem("token")) {
-            this.opponentCards = [];
-            childNode.child("/cards").forEach(superChild => {
-              this.opponentCards.push("ga bole liat");
-            });
+        console.log(snapshot.val(), 'AAA')
+        for (let key in snapshot.val()) {
+          console.log(key)
+          if (key!= 'name' && key !='playing' && key != localStorage.getItem('token')) {
+            firebase.ref("rooms/" + localStorage.getItem("room") + "/" + key + '/cards')
+            .on("value", snapshot => {
+                this.opponentCards.push('ga bole liat')
+            })
           }
-        });
+        } 
       }
-    });
+    })
   },
   methods: {
     pass() {
       firebase
         .database()
-        .ref(`players/${localStorage.getItem("token")}`)
+        .ref(`rooms/${localStorage.getItem("room")}/${localStorage.getItem("token")}`)
         .update(
           {
             turn: false,
@@ -177,30 +180,18 @@ export default {
               // this.alert = 'danger'
               // this.readyAlert = true
             } else {
-              let players = firebase.database().ref("players");
+              let players = firebase.database().ref(`rooms/${localStorage.getItem("room")}`);
               players.on("value", snapshot => {
-                snapshot.forEach(childNode => {
-                  let playerDone = childNode.child("/done").val();
-                  if (
-                    childNode.key != localStorage.getItem("token") &&
-                    !playerDone
-                  ) {
-                    firebase
-                      .database()
-                      .ref(`players/${childNode.key}`)
-                      .update(
+                for (let key in snapshot.val()) {
+                  if (key!= 'name' && key != localStorage.getItem('token')) {
+                   firebase
+                      .database().ref(`rooms/${localStorage.getItem("room")}/${key}`).update(
                         {
                           turn: true
-                        },
-                        error => {
-                          if (error) {
-                          } else {
-                          }
-                        }
-                      );
+                        })
                   }
-                });
-              });
+                  }
+                })
             }
           }
         );
@@ -215,7 +206,7 @@ export default {
           card = cards.data.cards[0];
           firebase
             .database()
-            .ref(`/players/${localStorage.getItem("token")}/cards`)
+            .ref(`rooms/${localStorage.getItem("room")}/${localStorage.getItem("token")}/cards`)
             .push(card);
         })
         .catch(err => {

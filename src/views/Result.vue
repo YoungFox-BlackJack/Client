@@ -15,7 +15,7 @@
 import firebase from  "firebase"
 export default {
   mounted () {
-    let players = firebase.database().ref('players')
+    let players = firebase.database().ref(`rooms/${localStorage.getItem("room")}`)
     players.on('value', (snapshot) => {
       snapshot.forEach((childNode) => {
         if (childNode.key === 'player1') {

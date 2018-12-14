@@ -117,11 +117,15 @@ export default {
           name: this.addRoomName,
           player1: {
             name: this.playerName || "TEST",
-            ready: false
+            ready: false,
+            turn: true,
+            done: false
           },
           player2: {
             name: null,
-            ready: false
+            ready: false,
+            turn: false,
+            done: false
           },
           playing: false
         })
@@ -130,6 +134,7 @@ export default {
           console.log("here");
           localStorage.setItem("player", "player1");
           localStorage.setItem("token", "player1");
+          localStorage.setItem("room",snapshot.key);
           this.$router.push(`room/${snapshot.key}`);
         });
     },
@@ -140,6 +145,7 @@ export default {
         .set(this.playerName, snapshot => {
           localStorage.setItem("player", "player2");
           localStorage.setItem("token", `player2`);
+            localStorage.setItem("room", id);
           this.$router.push(`room/${id}`);
         });
     }
